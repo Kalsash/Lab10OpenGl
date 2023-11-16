@@ -1,7 +1,10 @@
-﻿#include <iostream>
+﻿//https://github.com/Kalsash/Lab10OpenGl
+
+#include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// используется для преобразования координат
 const char* vertexShaderSource = R"(
     #version 330 core
     layout (location = 0) in vec3 aPos;
@@ -11,7 +14,7 @@ const char* vertexShaderSource = R"(
         gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }
 )";
-
+//Фрагментные или пиксельные шейдеры модифицируют цвет отображаемых пикселей
 const char* fragmentShaderSource = R"(
     #version 330 core
     out vec4 fragColor;
@@ -25,10 +28,6 @@ const char* fragmentShaderSource = R"(
 int main()
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
     GLFWwindow* window = glfwCreateWindow(800, 600, "Triangle", nullptr, nullptr);
     if (window == nullptr)
     {
@@ -50,10 +49,10 @@ int main()
     GLchar infoLog[512];
 
     // Создание и компиляция вершинного шейдера
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);//Объекты шейдеров создаются функцией glCreateShader.
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);//Инициализируются исходным кодом функцией glShaderSource
+    glCompileShader(vertexShader);// Компилируется функцией glCompileShader
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success); //Обработать ошибки
     if (!success)
     {
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
@@ -72,11 +71,11 @@ int main()
     }
 
     // Создание шейдерной программы
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
+    shaderProgram = glCreateProgram(); // Создаём шейдерную программу: glCreateProgram
+    glAttachShader(shaderProgram, vertexShader);// Присоединяем каждый шейдер функцией glAttachShader
     glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    glLinkProgram(shaderProgram);// Линкуем программу glLinkProgram
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success); // Обработать ошибки
     if (!success)
     {
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
@@ -92,23 +91,25 @@ int main()
          0.5f, -0.5f, 0.0f,
          0.0f,  0.5f, 0.0f
     };
-
+    //VAO используется для определения атрибутов вершин и их расположения, а 
+    //VBO используется для хранения самих вершинных данных.
     GLuint VBO, VAO;
     glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &VBO);//Создаём VBO: glGenBuffers
 
     // Привязка VAO
-    glBindVertexArray(VAO);
+    glBindVertexArray(VAO);// Вызываем демонов и биндим VBO
 
     // Заполнение VBO данными
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // Биндим VBO: glBindBuffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Заполняем его данными функцией glBufferData
 
     // Настройка атрибутов вершинного массива
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Расприведение к VAO 0 для избежания изменений VAO
+    // Сбрасывает текущий связанный вершинный массив, 
+    //возвращая OpenGL к состоянию, когда ни один вершинный массив не связан
     glBindVertexArray(0);
 
     while (!glfwWindowShouldClose(window))
@@ -117,24 +118,26 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Использование шейдерной программы
-        glUseProgram(shaderProgram);
+        glUseProgram(shaderProgram);// Установить шейдерную программу текущей: glUseProgram
 
         // Привязка VAO
-        glBindVertexArray(VAO);
+        glBindVertexArray(VAO); // Вызываем демонов и биндим VBO
 
         // Отрисовка треугольника
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        // Расприведение к VAO 0 для избежания изменений VAO
+        // Сбрасывает текущий связанный вершинный массив, 
+     //возвращая OpenGL к состоянию, когда ни один вершинный массив не связан
         glBindVertexArray(0);
 
+       // чтобы обновлять содержимое окна и обрабатывать пользовательский ввод.
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &VBO); //Удаление VBO: glDeleteBuffers
     glDeleteVertexArrays(1, &VAO);
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderProgram); //Удаление шейдерной программы: glDeleteProgram
 
     glfwTerminate();
     return 0;
